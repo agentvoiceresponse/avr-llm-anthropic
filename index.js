@@ -28,7 +28,7 @@ app.use(express.json());
  * @param {Object} res - The Express response object
  */
 const handlePromptStream = async (req, res) => {
-  const { messages } = req.body;
+  const { uuid,messages } = req.body;
 
   // Validate required input
   if (!messages) {
@@ -76,8 +76,8 @@ const handlePromptStream = async (req, res) => {
             }
             
             console.log(`>> Tool call: ${contentItem.name}`, contentItem.input);
-            const content = await handler(contentItem.input);
-            console.log(`>> Tool response: ${contentItem.name} -> ${content}`);
+            const content = await handler(uuid, contentItem.input);
+            console.log(`>> Tool response: ${contentItem.name} ->`, content);
             res.write(JSON.stringify({ type: 'text', content }));
           } catch (toolError) {
             console.error(`Error executing tool ${contentItem.name}:`, toolError);
