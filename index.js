@@ -30,10 +30,15 @@ app.use(express.json());
 const handlePromptStream = async (req, res) => {
   const { uuid, messages } = req.body;
 
+  console.log(`>> Prompt stream received for UUID: ${uuid}`);
   // Validate required input
   if (!messages) {
     return res.status(400).json({ message: "Messages is required" });
   }
+
+  const filteredMessages = messages.map(msg => 
+    msg.role === 'system' ? { ...msg, role: 'user' } : msg
+  );
 
   // Set up SSE headers for streaming response
   res.setHeader("Content-Type", "text/event-stream");
@@ -52,7 +57,7 @@ const handlePromptStream = async (req, res) => {
         temperature: +process.env.ANTHROPIC_TEMPERATURE || 1,
         system:
           process.env.ANTHROPIC_SYSTEM_PROMPT || "You are a helpful assistant.",
-        messages,
+        messages: filteredMessages,
         tools,
       })
       .on("text", (text) => {
